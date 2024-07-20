@@ -1,0 +1,115 @@
+<html>
+    <head>
+<title>Crazy Driver Sim - Urban Mayhem Racing Simulator</title>
+<style>
+    body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+        font-family: 'Press Start 2P', cursive;
+        background-color: #000;
+        color: #fff;
+    }
+    #gameCanvas {
+        width: 100%;
+        height: 100%;
+        image-rendering: pixelated;
+    }
+    #ui {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        font-size: 16px;
+    }
+    #controls {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        font-size: 14px;
+        background-color: rgba(0,0,0,0.7);
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>
+</head>
+<body>
+<div id="gameTitle">Crazy Driver Sim</div>
+<canvas id="gameCanvas"></canvas>
+<div id="ui">
+    <div>Speed: <span id="speedometer">0</span> km/h</div>
+    <div>Score: <span id="score">0</span></div>
+    <div>Wanted Level: <span id="wantedLevel">0</span></div>
+</div>
+<div id="controls">
+    Controls:<br>
+    Arrow keys to steer<br>
+    Up to accelerate<br>
+    Down to brake
+</div>
+<button id="newCityBtn">Generate New City</button>
+<div id="radioControls">
+    <button id="prevChannel" class="radioBtn">Previous Channel</button>
+    <button id="nextChannel" class="radioBtn">Next Channel</button>
+    <button id="stopRadio" class="radioBtn">Stop Radio</button>
+    <div id="nowPlaying"></div>
+</div>
+<div id="gameOverScreen">
+    <h1>Game Over</h1>
+    <p>Your Score: <span id="finalScore"></span></p>
+    <button id="restartBtn">Restart</button>
+</div>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const speedometer = document.getElementById('speedometer');
+const scoreElement = document.getElementById('score');
+const wantedLevelElement = document.getElementById('wantedLevel');
+const newCityBtn = document.getElementById('newCityBtn');
+const nowPlaying = document.getElementById('nowPlaying');
+const gameOverScreen = document.getElementById('gameOverScreen');
+const finalScoreElement = document.getElementById('finalScore');
+const restartBtn = document.getElementById('restartBtn');
+
+let city = [];
+let buildings = [];
+let trees = [];
+let pedestrians = [];
+let bloodSplashes = [];
+let policeCars = [];
+const trackWidth = 80;
+const sidewalkWidth = 20;
+const trackSegments = 8;
+const minSegmentLength = 200;
+const maxSegmentLength = 400;
+const citySize = 4; // 4x4 grid of tracks
+const maxPedestrians = 40;
+const numPoliceCars = 5;
+
+let playerX = 0;
+let playerY = 0;
+let playerAngle = 0;
+let playerSpeed = 0;
+let currentTrack = 0;
+let currentSegment = 0;
+let score = 0;
+let wantedLevel = 0;
+let gameOver = false;
+
+const keys = {};
+
+// Radio stations
+const radioStations = [
+    { name: "Chaos FM", url: "https://streaming.radio.co/s5c5da6a36/listen" },
+    { name: "Mayhem Beats", url: "https://radio.plaza.one/mp3" },
+    { name: "Crazy Tunes", url: "https://streams.ilovemusic.de/iloveradio17.mp3" },
+    { name: "Smooth Criminal", url: "https://streaming.radio.co/s3928a1fef/listen" },
+    { name: "Getaway Rock", url: "https://streaming.radio.co/s5c5da6a36/listen" }
+];
+</script>
+
+</body></html>
