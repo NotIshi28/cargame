@@ -301,6 +301,117 @@ function generateTrees() {
     }
 }
 
+
+function generatePedestrians() {
+    pedestrians = [];
+    const gridSize = 2000;
+    const totalArea = citySize * citySize * gridSize * gridSize;
+    const pedestrianCount = Math.min(maxPedestrians, Math.floor(totalArea / 100000));
+
+    for (let i = 0; i < pedestrianCount; i++) {
+        const trackIndex = Math.floor(Math.random() * city.length);
+        const track = city[trackIndex];
+        const segmentIndex = Math.floor(Math.random() * (track.length - 1));
+        const start = track[segmentIndex];
+        const end = track[segmentIndex + 1];
+        const progress = Math.random();
+        const x = start.x + (end.x - start.x) * progress;
+        const y = start.y + (end.y - start.y) * progress;
+        const angle = Math.atan2(end.y - start.y, end.x - start.x);
+        const side = Math.random() < 0.5 ? 1 : -1;
+        
+        pedestrians.push({
+            x: x + Math.cos(angle + Math.PI/2) * (trackWidth/2 + sidewalkWidth/2) * side,
+            y: y + Math.sin(angle + Math.PI/2) * (trackWidth/2 + sidewalkWidth/2) * side,
+            angle: angle,
+            speed: Math.random() * 0.5 + 0.5,
+            trackIndex: trackIndex,
+            segmentIndex: segmentIndex,
+            progress: progress,
+            side: side
+        });
+    }
+}
+
+function generatePoliceCars() {
+    policeCars = [];
+    for (let i = 0; i < numPoliceCars; i++) {
+        const trackIndex = Math.floor(Math.random() * city.length);
+        const track = city[trackIndex];
+        const segmentIndex = Math.floor(Math.random() * (track.length - 1));
+        const start = track[segmentIndex];
+        const end = track[segmentIndex + 1];
+        const progress = Math.random();
+        const x = start.x + (end.x - start.x) * progress;
+        const y = start.y + (end.y - start.y) * progress;
+        const angle = Math.atan2(end.y - start.y, end.x - start.x);
+        
+        policeCars.push({
+            x: x,
+            y: y,
+            angle: angle,
+            speed: 0,
+            trackIndex: trackIndex,
+            segmentIndex: segmentIndex,
+            progress: progress,
+            chasing: false
+        });
+    }
+}
+
+function generateWindows(floors) {
+    const windows = [];
+    for (let floor = 0; floor < floors; floor++) {
+        for (let window = 0; window < 4; window++) {
+            windows.push(Math.random() > 0.3);  // 70% chance of a lit window
+        }
+    }
+    return windows;
+}
+
+function generateCity() {
+    city = [];
+    const gridSize = 2000;
+    for (let i = 0; i < citySize; i++) {
+        for (let j = 0; j < citySize; j++) {
+            const startX = i * gridSize;
+            const startY = j * gridSize;
+            // Horizontal track
+            city.push(generateTrack(startX, startY, (i+1) * gridSize, startY));
+            // Vertical track
+            city.push(generateTrack(startX, startY, startX, (j+1) * gridSize));
+        }
+    }
+    
+    generateBuildings();
+    generateTrees();
+    generatePedestrians();
+    generatePoliceCars();
+    
+    // Reset player position and score
+    playerX = 0;
+    playerY = 0;
+    playerAngle = 0;
+    playerSpeed = 0;
+    currentTrack = 0;
+    currentSegment = 0;
+    score = 0;
+    wantedLevel = 0;
+    scoreElement.textContent = score;
+    wantedLevelElement.textContent = wantedLevel;
+    bloodSplashes = [];
+    gameOver = false;
+    gameOverScreen.style.display = 'none';
+}
+
+function drawBackground() {
+    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    gradient.addColorStop(0, "#2ecc71");
+    gradient.addColorStop(1, "#27ae60");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
 </script>
 
 </body></html>
