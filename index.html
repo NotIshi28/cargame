@@ -198,6 +198,109 @@ document.getElementById('prevChannel').addEventListener('click', () => changeCha
 document.getElementById('nextChannel').addEventListener('click', () => changeChannel(1));
 document.getElementById('stopRadio').addEventListener('click', stopRadio);
 
+function changeChannel(direction) {
+    currentChannel = (currentChannel + direction + radioStations.length) % radioStations.length;
+    playRadio(currentChannel);
+}
+
+function playRadio(index) {
+    if (currentRadio) {
+        currentRadio.pause();
+    }
+    currentRadio = new Audio(radioStations[index].url);
+    currentRadio.play();
+    nowPlaying.textContent = `Now playing: ${radioStations[index].name}`;
+}
+
+function stopRadio() {
+    if (currentRadio) {
+        currentRadio.pause();
+        currentRadio = null;
+        nowPlaying.textContent = '';
+        currentChannel = -1;
+    }
+}
+
+function generateTrack(startX, startY, endX, endY) {
+    let track = [{x: startX, y: startY}];
+    let currentX = startX;
+    let currentY = startY;
+    const dx = endX - startX;
+    const dy = endY - startY;
+    const angle = Math.atan2(dy, dx);
+    const length = Math.sqrt(dx*dx + dy*dy);
+    const segmentLength = length / (trackSegments - 1);
+
+    for (let i = 1; i < trackSegments - 1; i++) {
+        const progress = i / (trackSegments - 1);
+        const noise = (Math.random() - 0.5) * segmentLength * 0.5;
+        currentX = startX + Math.cos(angle) * segmentLength * i + Math.cos(angle + Math.PI/2) * noise;
+        currentY = startY + Math.sin(angle) * segmentLength * i + Math.sin(angle + Math.PI/2) * noise;
+        track.push({x: currentX, y: currentY});
+    }
+    track.push({x: endX, y: endY});
+    return track;
+}
+
+function generateBuildings() {
+    buildings = [];
+    const gridSize = 2000;
+    for (let i = 0; i < citySize; i++) {
+        for (let j = 0; j < citySize; j++) {
+            const x = i * gridSize + trackWidth + sidewalkWidth;
+            const y = j * gridSize + trackWidth + sidewalkWidth;
+            const maxWidth = gridSize - 2 * (trackWidth + sidewalkWidth);
+            const maxHeight = gridSize - 2 * (trackWidth + sidewalkWidth);
+
+            // Generate 5-10 buildings per block
+            const buildingCount = Math.floor(Math.random() * 6) + 5;
+            for (let k = 0; k < buildingCount; k++) {
+                const buildingWidth = Math.random() * (maxWidth / 4) + maxWidth / 8;
+                const buildingHeight = Math.random() * (maxHeight / 4) + maxHeight / 8;
+                const buildingX = x + Math.random() * (maxWidth - buildingWidth);
+                const buildingY = y + Math.random() * (maxHeight - buildingHeight);
+                const buildingColor = `rgb(${Math.random()*50+100}, ${Math.random()*50+100}, ${Math.random()*50+100})`;
+                const floors = Math.floor(Math.random() * 5) + 3;
+                buildings.push({
+                    x: buildingX,
+                    y: buildingY,
+                    width: buildingWidth,
+                    height: buildingHeight,
+                    color: buildingColor,
+                    floors: floors,
+                    windows: generateWindows(floors)
+                });
+            }
+        }
+    }
+}
+
+function generateTrees() {
+    trees = [];
+    const gridSize = 2000;
+    for (let i = 0; i < citySize; i++) {
+        for (let j = 0; j < citySize; j++) {
+            const x = i * gridSize + trackWidth + sidewalkWidth;
+            const y = j * gridSize + trackWidth + sidewalkWidth;
+            const maxWidth = gridSize - 2 * (trackWidth + sidewalkWidth);
+            const maxHeight = gridSize - 2 * (trackWidth + sidewalkWidth);
+
+            // Generate 10-20 trees per block
+            const treeCount = Math.floor(Math.random() * 11) + 10;
+            for (let k = 0; k < treeCount; k++) {
+                const treeX = x + Math.random() * maxWidth;
+                const treeY = y + Math.random() * maxHeight;
+                const treeSize = Math.random() * 30 + 20;
+                trees.push({
+                    x: treeX,
+                    y: treeY,
+                    size: treeSize
+                });
+            }
+        }
+    }
+}
+
 </script>
 
 </body></html>
