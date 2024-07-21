@@ -31,6 +31,73 @@
         padding: 10px;
         border-radius: 5px;
     }
+    #newCityBtn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        padding: 10px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    #radioControls {
+        position: absolute;
+        top: 60px;
+        right: 10px;
+        background-color: rgba(0,0,0,0.7);
+        padding: 10px;
+        border-radius: 5px;
+    }
+    .radioBtn {
+        display: block;
+        margin: 5px 0;
+        padding: 5px 10px;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+    #nowPlaying {
+        margin-top: 10px;
+        font-size: 12px;
+    }
+    #gameOverScreen {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.8);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-size: 24px;
+        color: white;
+        display: none;
+    }
+    #restartBtn {
+        margin-top: 20px;
+        padding: 10px 20px;
+        font-size: 18px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    #gameTitle {
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 24px;
+        font-weight: bold;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
 </style>
 </head>
 <body>
@@ -59,6 +126,7 @@
     <p>Your Score: <span id="finalScore"></span></p>
     <button id="restartBtn">Restart</button>
 </div>
+
 
 <script>
 const canvas = document.getElementById('gameCanvas');
@@ -110,6 +178,26 @@ const radioStations = [
     { name: "Smooth Criminal", url: "https://streaming.radio.co/s3928a1fef/listen" },
     { name: "Getaway Rock", url: "https://streaming.radio.co/s5c5da6a36/listen" }
 ];
+
+let currentRadio = null;
+let currentChannel = -1;
+
+document.addEventListener('keydown', (e) => {
+    keys[e.code] = true;
+});
+
+document.addEventListener('keyup', (e) => {
+    keys[e.code] = false;
+});
+
+newCityBtn.addEventListener('click', generateCity);
+restartBtn.addEventListener('click', restartGame);
+
+// Radio controls
+document.getElementById('prevChannel').addEventListener('click', () => changeChannel(-1));
+document.getElementById('nextChannel').addEventListener('click', () => changeChannel(1));
+document.getElementById('stopRadio').addEventListener('click', stopRadio);
+
 </script>
 
 </body></html>
