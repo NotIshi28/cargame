@@ -412,6 +412,112 @@ function drawBackground() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
+function drawCity() {
+    city.forEach(track => {
+        ctx.beginPath();
+        ctx.moveTo(track[0].x, track[0].y);
+        for (let i = 1; i < track.length; i++) {
+            ctx.lineTo(track[i].x, track[i].y);
+        }
+        ctx.strokeStyle = "#555";
+        ctx.lineWidth = trackWidth;
+        ctx.stroke();
+
+        // Draw sidewalks
+        ctx.beginPath();
+        ctx.moveTo(track[0].x, track[0].y);
+        for (let i = 1; i < track.length; i++) {
+            ctx.lineTo(track[i].x, track[i].y);
+        }
+        ctx.strokeStyle = "#999";
+        ctx.lineWidth = trackWidth + sidewalkWidth * 2;
+        ctx.stroke();
+
+        // Draw road markings
+        ctx.strokeStyle = "#FFF";
+        ctx.lineWidth = 2;
+        ctx.setLineDash([20, 20]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    });
+}
+
+function drawBuildings() {
+    buildings.forEach(building => {
+        ctx.fillStyle = building.color;
+        ctx.fillRect(building.x, building.y, building.width, building.height);
+        
+        // Windows
+        const floorHeight = building.height / building.floors;
+        const windowWidth = building.width / 5;
+        ctx.fillStyle = "rgba(255, 255, 0, 0.5)";
+        for (let floor = 0; floor < building.floors; floor++) {
+            for (let window = 0; window < 4; window++) {
+                if (building.windows[floor * 4 + window]) {
+                    ctx.fillRect(
+                        building.x + (window + 1) * windowWidth,
+                        building.y + floor * floorHeight + floorHeight / 4,
+                        windowWidth / 2,
+                        floorHeight / 2
+                    );
+                }
+            }
+        }
+    });
+}
+
+function drawTrees() {
+    trees.forEach(tree => {
+        // Draw trunk
+        ctx.fillStyle = "#8B4513";
+        ctx.fillRect(tree.x - tree.size/8, tree.y - tree.size/2, tree.size/4, tree.size/2);
+        
+        // Draw foliage
+        ctx.beginPath();
+        ctx.moveTo(tree.x, tree.y - tree.size);
+        ctx.lineTo(tree.x + tree.size/2, tree.y - tree.size/2);
+        ctx.lineTo(tree.x - tree.size/2, tree.y - tree.size/2);
+        ctx.closePath();
+        ctx.fillStyle = "#228B22";
+        ctx.fill();
+    });
+}
+
+function drawPedestrians() {
+    ctx.fillStyle = "#F4A460";
+    pedestrians.forEach(ped => {
+        ctx.beginPath();
+        ctx.arc(ped.x, ped.y, 5, 0, Math.PI * 2);
+        ctx.fill();
+    });
+}
+
+function drawPlayer() {
+    ctx.save();
+    ctx.translate(canvas.width/2, canvas.height/2);
+    ctx.rotate(playerAngle);
+    ctx.fillStyle = "red";
+    ctx.fillRect(-15, -7.5, 30, 15);
+    ctx.restore();
+}
+
+function drawPoliceCars() {
+    policeCars.forEach(car => {
+        ctx.save();
+        ctx.translate(car.x, car.y);
+        ctx.rotate(car.angle);
+        ctx.fillStyle = "blue";
+        ctx.fillRect(-15, -7.5, 30, 15);
+        
+        // Draw police lights
+        const lightSize = 5;
+        ctx.fillStyle = (Date.now() % 1000 < 500) ? "red" : "blue";
+        ctx.fillRect(-10, -7.5 - lightSize, lightSize, lightSize);
+        ctx.fillRect(10 - lightSize, -7.5 - lightSize, lightSize, lightSize);
+        
+        ctx.restore();
+    });
+}
 </script>
 
 </body></html>
