@@ -611,6 +611,135 @@ function updatePoliceCars() {
     });
 }
 
+function update() {
+    if (gameOver) return;
+
+    if (keys['ArrowLeft']) {
+        playerAngle -= 0.05;
+    }
+    if (keys['ArrowRight']) {
+        playerAngle += 0.05;
+    }
+    if (keys['ArrowUp']) {
+        playerSpeed = Math.min(playerSpeed + 0.2, 10);
+    } else if (keys['ArrowDown']) {
+        playerSpeed = Math.max(playerSpeed - 0.4, 0);
+    } else {
+        playerSpeed *= 0.98;
+    }
+
+    const newX = playerX + Math.cos(playerAngle) * playerSpeed;
+    const newY = playerY + Math.sin(playerAngle) * playerSpeed;
+
+    // Check for collision with any track
+    let onTrack = false;
+    for (let i = 0; i < city.length; i++) {
+        if (distanceToTrack(newX, newY, city[i]) <= trackWidth / 2) {
+            onTrack = true;
+            currentTrack = i;
+            break;
+        }
+    }
+
+    if (onTrack) {
+        playerX = newX;
+        playerY = newY;
+    } else {
+        playerSpeed *= 0.5; // Slow down on collision
+    }
+
+    // Update pedestrians
+    pedestrians.forEach((ped, index) => {
+        const track = city[ped.trackIndex];
+        const start = track[ped.segmentIndex];
+        const end = track[ped.segmentIndex + 1];
+        ped.progress += ped.speed / Math.sqrt((end.x - start.x)**2 + (end.y - start.y)**2);
+
+        if (ped.progress >= 1) {
+            ped.segmentIndex++;
+            ped.progress = 0;
+            if (ped.segmentIndex >= track.length - 1) {
+                ped.segmentIndex = 0;
+            }
+        }
+
+        const newStart = track[ped.segmentIndex];
+        const newEnd = track[ped.segmentIndex + 1];
+        ped.x = newStart.x + (newEnd.x - newStart.x) * ped.progress;
+        ped.y = newStart.y + (newEnd.y - newStart.y) * ped.progress;
+        ped.angle = Math.atan2(newEnd.y - newStart.y, newEnd.x - newStart.x);
+
+        // Offset pedestrian to sidewalk
+        ped.x += Math.cos(ped.angle + Math.PI/2) * (trackWidth/2 + sidewalkWidth/2) * ped.side;
+        ped.y += Math.sin(ped.angle + Math.PI/2) * (trackWidth/2 + sidewalkWidth/2) * ped.side;
+
+        // Check for collision with player
+        const dx = ped.x - playerX;
+        const dy = ped.y - playerY;
+        const distance = Math.sqrt(dx*dx + dy*dy);
+        if (distance < 20) {  // If player hits pedestrian
+            score++;
+            wantedLevel++;
+            scoreElement.textContent = score;
+            wantedLevelElement.textContent = wantedLevel;
+            // Create blood splash
+            bloodSplashes.push({
+                x: ped.x,
+                y: ped.y,
+                size: Math.random() * 5 + 5
+            });
+            // Respawn pedestrian at a random location
+            const newTrackIndex = Math.floor(Math.random() * city.length);
+            const newTrack = city[newTrackIndex];
+            ped.trackIndex = newTrackIndex;
+            ped.segmentIndex = Math.floor(Math.random() * (newTrack.length - 1));
+            ped.progress = 0;
+            ped.side = Math.random() < 0.5 ? 1 : -1;
+        }
+    });
+
+    updatePoliceCars();
+
+    speedometer.textContent = Math.round(playerSpeed * 10);
+}
+
+function endGame() {
+    gameOver = true;
+    finalScoreElement.textContent = score;
+    gameOverScreen.style.display = 'flex';
+}
+
+function restartGame() {
+    generateCity();
+    gameLoop();
+}
+
+function gameLoop() {
+    if (gameOver) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    drawBackground();
+    
+    ctx.save();
+    ctx.translate(canvas.width/2 - playerX, canvas.height/2 - playerY);
+    drawTrees();
+    drawBuildings();
+    drawCity();
+    drawPedestrians();
+    drawBloodSplashes();
+    drawPoliceCars();
+    ctx.restore();
+    
+    drawPlayer();
+    
+    update();
+    
+    requestAnimationFrame(gameLoop);
+}
+
+generateCity();
+gameLoop();
 </script>
 
 </body></html>
