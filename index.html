@@ -518,6 +518,99 @@ function drawPoliceCars() {
         ctx.restore();
     });
 }
+
+function drawBloodSplashes() {
+    ctx.fillStyle = "#8B0000";
+    bloodSplashes.forEach(splash => {
+        ctx.beginPath();
+        ctx.arc(splash.x, splash.y, splash.size, 0, Math.PI * 2);
+        ctx.fill();
+    });
+}
+
+function distanceToTrack(x, y, track) {
+    let minDist = Infinity;
+    for (let i = 0; i < track.length - 1; i++) {
+        const start = track[i];
+        const end = track[i + 1];
+        const progress = getSegmentProgress(x, y, start, end);
+        const pos = getTrackPosition(start, end, progress);
+        const dist = Math.sqrt((x - pos.x)**2 + (y - pos.y)**2);
+        minDist = Math.min(minDist, dist);
+    }
+    return minDist;
+}
+
+function getSegmentProgress(x, y, start, end) {
+    const dx = end.x - start.x;
+    const dy = end.y - start.y;
+    const segmentLength = Math.sqrt(dx*dx + dy*dy);
+    const playerDx = x - start.x;
+    const playerDy = y - start.y;
+    const dotProduct = playerDx*dx + playerDy*dy;
+    return Math.max(0, Math.min(1, dotProduct / (segmentLength*segmentLength)));
+}
+
+function getTrackPosition(start, end, progress) {
+    return {
+        x: start.x + (end.x - start.x) * progress,
+        y: start.y + (end.y - start.y) * progress
+    };
+}
+
+function updatePoliceCars() {
+    policeCars.forEach(car => {
+        const track = city[car.trackIndex];
+        const start = track[car.segmentIndex];
+        const end = track[car.segmentIndex + 1];
+        
+        if (car.chasing) {
+            // Chase the player
+            const dx = playerX - car.x;
+            const dy = playerY - car.y;
+            const distanceToPlayer = Math.sqrt(dx*dx + dy*dy);
+            
+            if (distanceToPlayer > 20) {
+                car.angle = Math.atan2(dy, dx);
+                car.speed = Math.min(car.speed + 0.1, 8);
+            } else {
+                car.speed *= 0.95;
+            }
+            
+            car.x += Math.cos(car.angle) * car.speed;
+            car.y += Math.sin(car.angle) * car.speed;
+            
+            // Check if police caught the player
+            if (distanceToPlayer < 30) {
+                endGame();
+            }
+        } else {
+            // Normal patrol behavior
+            car.progress += 0.005;
+            if (car.progress >= 1) {
+                car.segmentIndex++;
+                car.progress = 0;
+                if (car.segmentIndex >= track.length - 1) {
+                    car.segmentIndex = 0;
+                }
+            }
+            
+            car.x = start.x + (end.x - start.x) * car.progress;
+            car.y = start.y + (end.y - start.y) * car.progress;
+            car.angle = Math.atan2(end.y - start.y, end.x - start.x);
+            
+            // Check if player is nearby
+            const dx = playerX - car.x;
+            const dy = playerY - car.y;
+            const distanceToPlayer = Math.sqrt(dx*dx + dy*dy);
+            
+            if (distanceToPlayer < 300 && wantedLevel > 0) {
+                car.chasing = true;
+            }
+        }
+    });
+}
+
 </script>
 
 </body></html>
